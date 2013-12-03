@@ -43,28 +43,14 @@ var commands = {
   }
 };
 
-var doCommand = function(storage, input) {
-  var tokens = input.split(" ");
-  return (commands[tokens.first()] || commands.help)(storage, tokens.rest());
-};
-
-var cli = function(storage) {
-  var readline = require('readline').createInterface(process.stdin, process.stdout);
-
-  readline.setPrompt('> ');
-  readline.prompt();
-
-  readline.on('line', function(input) {
-    storage = doCommand(storage, input.trim());
-    readline.prompt();
-  }).on('close', function() {
-    console.log('Bye!');
-    process.exit(0);
-  });
-};
-
 var Book = function(storage) {
   this.storage = storage;
+};
+
+Book.prototype.cmd = function(input) {
+  var tokens = input.split(" ");
+  this.storage = (commands[tokens.first()] || commands.help)(this.storage, tokens.rest());
+  return this;
 };
 
 var createCommand = function(cmd) {
@@ -82,6 +68,22 @@ var createCommand = function(cmd) {
 for (cmd in commands) {
   Book.prototype[cmd] = createCommand(cmd);
 }
+
+var cli = function(storage) {
+  var book = new Book(storage),
+      readline = require('readline').createInterface(process.stdin, process.stdout);
+
+  readline.setPrompt('> ');
+  readline.prompt();
+
+  readline.on('line', function(input) {
+    book.cmd(input.trim());
+    readline.prompt();
+  }).on('close', function() {
+    console.log('Bye!');
+    process.exit(0);
+  });
+};
 
 exports.cli = cli;
 exports.Book = Book;
