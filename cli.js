@@ -1,3 +1,3 @@
 var ab = require("./addressbook");
-ab.cli();
+ab.cli({});
 
