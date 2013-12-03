@@ -1,7 +1,3 @@
-exports.hello = function() {
-  return "Hello, World!";
-}
-
 Array.prototype.first = function() {
   return this[0];
 }
@@ -67,5 +63,26 @@ var cli = function(storage) {
   });
 };
 
+var Book = function(storage) {
+  this.storage = storage;
+};
+
+var createCommand = function(cmd) {
+  return function() {
+    var command = commands[cmd],
+        args = Array.prototype.slice.call(arguments, 0);
+
+    if(command) {
+      this.storage = commands[cmd](this.storage, args);
+    }
+    return this;
+  }
+}
+
+for (cmd in commands) {
+  Book.prototype[cmd] = createCommand(cmd);
+}
+
 exports.cli = cli;
+exports.Book = Book;
 
